@@ -10,4 +10,5 @@ import UIKit
 
 class GiffyConfiguration: ObservableObject {
     @Published var onLoopCompletion: () -> Void = { }
+    @Published var contentMode: UIView.ContentMode = .scaleAspectFit
 }

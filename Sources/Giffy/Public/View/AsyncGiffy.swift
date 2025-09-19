@@ -10,26 +10,29 @@ import SwiftUI
 
 /// A SwiftUI view that can display an animted GIF image from a remote URL. To present an GIF image that is stored locally, use the ``Giffy`` component instead.
 public struct AsyncGiffy<Content: View>: View {
-    @ViewBuilder
-    private let content: (AsyncGiffyPhase) -> Content
-    @State private var phase: AsyncGiffyPhase = .loading
     
     let url: URL
+    @ViewBuilder
+    private let content: (AsyncGiffyPhase) -> Content
+    
+    /// Creates a view that presents an animted GIF image from a remote URL to be displayed in phases
+    /// - Parameters:
+    ///   - url: The remote URL of an animated GIF image to be displayed
+    ///   - content: A closure that takes the current phase as an input and returns the view to be displayed in each phase
+    public init(
+        url: URL,
+        @ViewBuilder content: @escaping (AsyncGiffyPhase) -> Content
+    ) {
+        self.url = url
+        self.content = content
+    }
     
     private let logger = Logger(
         subsystem: "Giffy",
         category: String(describing: AsyncGiffy.self)
     )
     
-    /// Creates a view that presents an animted GIF image from a remote URL to be displayed in phases
-    /// - Parameters:
-    ///   - url: The remote URL of an animated GIF image to be displayed
-    ///   - content: A closure that takes the current phase as an input and returns the view to be displayed in each phase
-    public init(url: URL,
-                @ViewBuilder content: @escaping (AsyncGiffyPhase) -> Content) {
-        self.content = content
-        self.url = url
-    }
+    @State private var phase: AsyncGiffyPhase = .loading
     
     public var body: some View {
         content(phase)
@@ -48,21 +51,17 @@ public struct AsyncGiffy<Content: View>: View {
     }
 }
 
-struct Giffy_Previews: PreviewProvider {
-    static var previews: some View {
-        AsyncGiffy(url: .init(string: "https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif")!) { phase in
-            switch phase {
-            case .loading:
-                Text("Loading...")
-            case .error:
-                Text("Error")
-            case .success(let gif):
-                gif
-                    .onLoop {
-                        print("Finished looping!")
-                    }
-                    .frame(height: 120)
-            }
+#Preview {
+    AsyncGiffy(url: .init(string: "https://epic-hire-qa.s3.amazonaws.com/conversations/2562/media/a38b0747-b271-4ca0-8942-fc3eee398635.gif")!) { phase in
+        switch phase {
+        case .loading:
+            Text("Loading...")
+        case .error:
+            Text("Error")
+        case .success(let gif):
+            gif
+                .contentMode(.scaleAspectFill)
         }
     }
+    .frame(width: 300, height: 300)
 }

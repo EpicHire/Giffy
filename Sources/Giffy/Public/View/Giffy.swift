@@ -13,6 +13,7 @@ import FLAnimatedImage
 
 /// A SwiftUI view that can display an animted GIF image that is stored locally. To present animation from a remote URL, use ``AsyncGiffy`` instead.
 public struct Giffy: UIViewRepresentable {
+    
     @ObservedObject internal var configuration: GiffyConfiguration
     private let contentSource: GiffyContentSource
     
@@ -20,7 +21,6 @@ public struct Giffy: UIViewRepresentable {
         let imageView = FLAnimatedImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.layer.masksToBounds = true
-        imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
@@ -60,6 +60,7 @@ public struct Giffy: UIViewRepresentable {
         
         imageView.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
         imageView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+        imageView.contentMode = configuration.contentMode
         
         setupImage(for: self.contentSource)
         
@@ -68,6 +69,7 @@ public struct Giffy: UIViewRepresentable {
     
     public func updateUIView(_ uiView: UIView, context: Context) {
         imageView.loopCompletionBlock = { _ in configuration.onLoopCompletion() }
+        imageView.contentMode = configuration.contentMode
     }
     
     private func setupImage(for contentSource: GiffyContentSource) {
@@ -96,6 +98,7 @@ public struct Giffy: UIViewRepresentable {
 }
 
 extension Giffy {
+    
     /**
     Sets the block of code to be executed when the GIF animation has completed a full loop.
 
@@ -112,8 +115,25 @@ extension Giffy {
         }
      ```
     */
-    public func onLoop(_ completion: @escaping () -> Void) -> Giffy{
+    public func onLoop(_ completion: @escaping () -> Void) -> Giffy {
         self.configuration.onLoopCompletion = completion
+        return self
+    }
+    
+    /**
+     Sets the content mode used to render the Gif.
+
+      - Parameter cotnentMode: The content mode used to render the Gif.
+
+      - Returns: A modified instance of Giffy with the content mode set.
+      
+      ```swift
+      Giffy("hello")
+         .contentMode(.scaleToFill)
+      ```
+     */
+    public func contentMode(_ contentMode: UIView.ContentMode) -> Giffy {
+        self.configuration.contentMode = contentMode
         return self
     }
 }
